@@ -13,7 +13,7 @@ function onLoad(framework) {
   var renderer = framework.renderer;
   var gui = framework.gui;
   var stats = framework.stats;
-
+  
   // initialize a simple box and material
   var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
   directionalLight.color.setHSL(0.1, 1, 0.95);
@@ -38,7 +38,7 @@ function onLoad(framework) {
     doLsystem(lsys, lsys.iterations, turtle);
   });
 
-  gui.add(lsys, 'iterations', 0, 12).step(1).onChange(function(newVal) {
+  gui.add(lsys, 'iterations', 1, 12).step(1).onChange(function(newVal) {
     clearScene(turtle);
     doLsystem(lsys, newVal, turtle);
   });
@@ -54,7 +54,7 @@ function clearScene(turtle) {
 }
 
 function doLsystem(lsystem, iterations, turtle) {
-    var result = lsystem.DoIterations(iterations);
+    var result = lsystem.doIterations(iterations);
     turtle.clear();
     turtle = new Turtle(turtle.scene);
     turtle.renderSymbols(result);
