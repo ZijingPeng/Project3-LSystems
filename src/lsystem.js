@@ -97,9 +97,12 @@ export default function Lsystem(axiom, grammar, iterations) {
 	this.axiom = "FX";
 	this.grammar = {};
 	this.grammar['X'] = [
-		new Rule(1.0, '[-FX][+FX]')
+		//new Rule(1.0, '[-FX][+FX]')
+		//new Rule(1.0, '[+FX][-FX[-FX]FX]FX[+FX][-FX]')
+		//new Rule(1.0, '[&FL!X]/////’[&FL!X]///////’[&FL!X]')
+		new Rule(1.0, '[&FX]/////[&FX]///////[&FX]')
 	];
-	this.iterations = 0; 
+	this.iterations = 1; 
 	
 	// Set up the axiom string
 	if (typeof axiom !== "undefined") {
@@ -145,7 +148,7 @@ export default function Lsystem(axiom, grammar, iterations) {
 				node = node.next;
 			}
 		}
-		console.log(lSystemLL);
+		//console.log(lSystemLL);
 		return lSystemLL;
 	}
 }
