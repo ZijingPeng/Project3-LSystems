@@ -15,11 +15,13 @@ function onLoad(framework) {
   var stats = framework.stats;
   
   // initialize a simple box and material
-  var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
-  directionalLight.color.setHSL(0.1, 1, 0.95);
-  directionalLight.position.set(1, 3, 2);
-  directionalLight.position.multiplyScalar(10);
-  scene.add(directionalLight);
+  //var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
+  //directionalLight.color.setHSL(0.1, 1, 0.95);
+  //directionalLight.position.set(5, 8, 0);
+  //scene.add(directionalLight);
+
+  var ambientLight = new THREE.AmbientLight( 0xeeeeee ); // soft white light
+  scene.add( ambientLight );
 
   // set camera position
   camera.position.set(1, 1, 2);
@@ -39,7 +41,7 @@ function onLoad(framework) {
   });
 
   gui.add(lsys, 'iterations', 0, 10).step(1).onChange(function(newVal) {
-    console.log(newVal);
+    //console.log(newVal);
     clearScene(turtle);
     doLsystem(lsys, newVal, turtle);
   });

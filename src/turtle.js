@@ -1,16 +1,39 @@
 const THREE = require("three");
+var OBJLoader = require("three-obj-loader");
+OBJLoader(THREE);
+var loader = new THREE.OBJLoader();
+var maki;
+loader.load(
+  "/src/assets/maki.obj",
+
+  function(object) {
+    object.traverse(function(child) {
+      if (child instanceof THREE.Mesh) {
+        child.material.color.setHex(0xeaa7d7);
+        child.material.side = THREE.DoubleSide;
+      }
+    });
+    object.scale.set(0.01, 0.01, 0.01);
+    maki = object;
+    //console.log(maki);
+    //object.applyMatrix(mat4);
+    //object.applyMatrix(mat5);
+    //console.log(object);
+  }
+);
+
 
 // A class used to encapsulate the state of a turtle at a given moment.
 // The Turtle class contains one TurtleState member variable.
 // You are free to add features to this state class,
 // such as color or whimiscality
-var TurtleState = function(pos, head, up, left, layer) {
+var TurtleState = function(pos, head, up, left, width) {
   return {
     pos: new THREE.Vector3(pos.x, pos.y, pos.z),
     head: new THREE.Vector3(head.x, head.y, head.z),
     up: new THREE.Vector3(up.x, up.y, up.z),
     left: new THREE.Vector3(left.x, left.y, left.z),
-    layer: layer
+    width: width
   };
 };
 
@@ -21,7 +44,7 @@ export default class Turtle {
       new THREE.Vector3(0, 1, 0),
       new THREE.Vector3(1, 0, 0),
       new THREE.Vector3(0, 0, 1),
-      0
+      0.1
     );
     this.scene = scene;
     this.records = [];
@@ -38,8 +61,10 @@ export default class Turtle {
         "/": this.rotateByHead.bind(this, -22.5),
         "|": this.rotateByUp.bind(this, 180),
         F: this.makeCylinder.bind(this, 2.5, 0.1),
+        L: this.makeFlower.bind(this),
         "[": this.storePos.bind(this),
-        "]": this.restorePos.bind(this)
+        "]": this.restorePos.bind(this),
+        "!" : this.decreaseWidth.bind(this)
       };
     } else {
       this.renderGrammar = grammar;
@@ -113,20 +138,22 @@ export default class Turtle {
     //this.state.head.normalize();
     var newVec = this.state.head.clone().multiplyScalar(dist);
     this.state.pos.add(newVec);
-    this.state.layer++;
   }
 
   // Make a cylinder of given length and width starting at turtle pos
   // Moves turtle pos ahead to end of the new cylinder
   makeCylinder(len, width) {
-    len =  2 * (1 - this.state.layer / 10);
-    var width1 = 0.4 / (this.state.layer * 4 + 4);
-    var width2 = 0.4 / (this.state.layer * 4 + 6);
+    //len = 2 * (1 - this.state.layer / 10);
+    //var width1 = 0.4 / (this.state.layer * 4 + 4);
+    //var width2 = 0.4 / (this.state.layer * 4 + 6);
+    len = 0.5;
+    var width1 = this.state.width;
+    var width2 = this.state.width;
     var geometry = new THREE.CylinderGeometry(width2, width1, len);
     var material = new THREE.MeshBasicMaterial({ color: 0x6c4327 });
     var cylinder = new THREE.Mesh(geometry, material);
     this.scene.add(cylinder);
-    
+
     //Orient the cylinder to the turtle's current direction
     var quat = new THREE.Quaternion();
     quat.setFromUnitVectors(new THREE.Vector3(0, 1, 0), this.state.head);
@@ -136,8 +163,10 @@ export default class Turtle {
 
     //Move the cylinder so its base rests at the turtle's current position
     var mat5 = new THREE.Matrix4();
-    
-    var trans = this.state.pos.clone().add(this.state.head.clone().multiplyScalar(0.5 * len));
+
+    var trans = this.state.pos
+      .clone()
+      .add(this.state.head.clone().multiplyScalar(0.5 * len));
     mat5.makeTranslation(trans.x, trans.y, trans.z);
     cylinder.applyMatrix(mat5);
 
@@ -145,16 +174,46 @@ export default class Turtle {
     this.moveForward(len);
   }
 
+  makeFlower() {
+    var len = 2 * (1 - (this.state.layer - 1) / 10);
+    var quat = new THREE.Quaternion();
+    quat.setFromUnitVectors(new THREE.Vector3(0, 1, 0), this.state.head);
+    var mat4 = new THREE.Matrix4();
+    mat4.makeRotationFromQuaternion(quat);
+
+    //Move the cylinder so its base rests at the turtle's current position
+    var mat5 = new THREE.Matrix4();
+
+    var trans = this.state.pos
+      .clone();
+    mat5.makeTranslation(trans.x, trans.y, trans.z);
+
+    while (!maki) {}
+    var makiMesh = maki.clone();
+    makiMesh.position.x += trans.x;
+    makiMesh.position.y += trans.y;
+    makiMesh.position.z += trans.z;
+    makiMesh.rotation.x += this.state.head.x;
+    makiMesh.rotation.y += this.state.head.y;
+    makiMesh.rotation.z += this.state.head.z;
+
+    this.scene.add(makiMesh);
+  }
+
+  decreaseWidth() {
+      this.state.width *= 0.6;
+  }
+
   storePos() {
     this.records.push(this.state.pos.clone());
     this.records.push(this.state.head.clone());
     this.records.push(this.state.up.clone());
     this.records.push(this.state.left.clone());
-    this.records.push(this.state.layer);
+    this.records.push(this.state.width);
   }
 
   restorePos() {
-    this.state.layer = this.records.pop();
+    this.state.width = this.records.pop();
     this.state.left = this.records.pop();
     this.state.up = this.records.pop();
     this.state.head = this.records.pop();
@@ -167,7 +226,7 @@ export default class Turtle {
   renderSymbol(symbolNode) {
     var func = this.renderGrammar[symbolNode.symbol];
     if (func) {
-        //console.log(symbolNode.symbol); 
+      //console.log(symbolNode.symbol);
       func();
       //console.log(this.state.head);
     }

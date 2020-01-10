@@ -89,6 +89,9 @@ function replaceNode(linkedList, node, replacementString) {
 	var ll = stringToLinkedList(replacementString);
 	linkNodes(prev, ll.head);
 	linkNodes(ll.tail, next);
+	if (!prev) {
+		linkedList.head = ll.head;
+	}
 	node = ll.tail;
 }
 
@@ -100,8 +103,14 @@ export default function Lsystem(axiom, grammar, iterations) {
 		//new Rule(1.0, '[-FX][+FX]')
 		//new Rule(1.0, '[+FX][-FX[-FX]FX]FX[+FX][-FX]')
 		//new Rule(1.0, '[&FL!X]/////’[&FL!X]///////’[&FL!X]')
-		new Rule(1.0, '[&FX]/////[&FX]///////[&FX]')
+		new Rule(1.0, '[&FL!X]/////[&FL!X]///////[&FL!X]')
 	];
+	this.grammar['F'] = [
+		new Rule(1.0, 'S/////F')
+	]
+	this.grammar['S'] = [
+		new Rule(1.0, 'FL')
+	]
 	this.iterations = 1; 
 	
 	// Set up the axiom string
@@ -148,7 +157,7 @@ export default function Lsystem(axiom, grammar, iterations) {
 				node = node.next;
 			}
 		}
-		//console.log(lSystemLL);
+		console.log(lSystemLL);
 		return lSystemLL;
 	}
 }
