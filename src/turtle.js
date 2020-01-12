@@ -85,7 +85,7 @@ export default class Turtle {
   }
 
   rotateByLeft(angle) {
-    var rand = (Math.random() - 0.5) * 10;
+    var rand = (Math.random() - 0.5) * 8;
     var radius = ((angle + rand) * 3.14) / 180;
     var axis = this.state.left;
     this.state.head.applyAxisAngle(axis, radius);
@@ -93,7 +93,7 @@ export default class Turtle {
   }
 
   rotateByUp(angle) {
-    var rand = (Math.random() - 0.5) * 10;
+    var rand = (Math.random() - 0.5) * 8;
     var radius = ((angle + rand) * 3.14) / 180;
     var axis = this.state.up;
     this.state.head.applyAxisAngle(axis, radius);
@@ -101,7 +101,7 @@ export default class Turtle {
   }
 
   rotateByHead(angle) {
-    var rand = (Math.random() - 0.5) * 10;
+    var rand = (Math.random() - 0.5) * 8;
     var radius = ((angle + rand) * 3.14) / 180;
     var axis = this.state.head;
     this.state.left.applyAxisAngle(axis, radius);

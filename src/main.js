@@ -24,20 +24,10 @@ async function onLoad(framework) {
 
   shadowLight = new THREE.DirectionalLight(0xffffff, 0.2);
   shadowLight.position.set(15, 35, 35);
-  shadowLight.castShadow = true;
-  shadowLight.shadow.camera.left = -400;
-  shadowLight.shadow.camera.right = 400;
-  shadowLight.shadow.camera.top = 400;
-  shadowLight.shadow.camera.bottom = -400;
-  shadowLight.shadow.camera.near = 1;
-  shadowLight.shadow.camera.far = 1000;
-  shadowLight.shadow.mapSize.width = 2048;
-  shadowLight.shadow.mapSize.height = 2048;
 
   scene.add(shadowLight);
   scene.add(hemisphereLight);
   scene.add(ambientLight);
-  //console.log(scene);
 
   // set camera position
   camera.position.set(8, 10, 0);
@@ -59,21 +49,6 @@ async function onLoad(framework) {
   };
   gui.add(params, 'reload').name('Play Again');
 
-/*
-  gui.add(lsys, "axiom").onChange(function(newVal) {
-    lsys.UpdateAxiom(newVal);
-    doLsystem(lsys, lsys.iterations, turtle);
-  });
-
-  
-  gui
-    .add(lsys, "iterations", 0, 7)
-    .step(1)
-    .onChange(function(newVal) {
-      clearScene(turtle);
-      doLsystem(lsys, newVal, turtle);
-    });
-    */
 }
 
 // clears the scene by removing all geometries added by turtle.js
@@ -97,12 +72,12 @@ function doLsystem(lsystem, iterations, turtle) {
 async function onUpdate(framework) {
   if (time % 5 == 0) {
 
-    if (time % 300 == 0 && time <= 3299 && time > 1 ) {
+    if (time % 200 == 0 && time <= 2199 && time > 1 ) {
       var lsys = new Lsystem();
       turtle = new Turtle(framework.scene);
       clearScene(turtle);
-      doLsystem(lsys, ((time / 300) % 11) / 2, turtle);
-      if ((time / 300) % 11 == 10) {
+      doLsystem(lsys, ((time / 200) % 11) / 2, turtle);
+      if ((time / 200) % 11 == 10) {
         turtle.createPetals();
       }
     }
@@ -116,10 +91,8 @@ async function onUpdate(framework) {
         else {
           petal.position.set(petal.position.x, petal.position.y-0.2, petal.position.z);
         }
-
       }
     }
-    //console.log(petal);
   }
   time++;
 }
