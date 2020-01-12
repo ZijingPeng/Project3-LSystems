@@ -1,7 +1,7 @@
-const path = require('path');
+const path = require("path");
 
 module.exports = {
-  entry: path.join(__dirname, "src/main"),
+  entry: ["babel-polyfill", path.join(__dirname, "src/main.js")],
   output: {
     filename: "./bundle.js"
   },
@@ -9,20 +9,20 @@ module.exports = {
     loaders: [
       {
         test: /\.js$/,
-        exclude: /(node_modules|bower_components)/,
-        loader: 'babel',
+        exclude: /node_modules/,
+        loader: "babel-loader",
         query: {
-          presets: ['es2015']
+          presets: ["env"]
         }
       },
       {
         test: /\.glsl$/,
         loader: "webpack-glsl"
-      },
+      }
     ]
   },
-  devtool: 'source-map',
+  devtool: "source-map",
   devServer: {
     port: 7000
   }
-}
+};

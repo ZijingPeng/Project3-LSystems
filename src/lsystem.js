@@ -114,7 +114,7 @@ export default function Lsystem(axiom, grammar, iterations) {
 		new Rule(3.0, 'F//////L'),
 		new Rule(4.0, 'F\\\\\\\\\\\\L')
 	]
-	this.iterations = 5; 
+	this.iterations = 0; 
 	
 	// Set up the axiom string
 	if (typeof axiom !== "undefined") {
@@ -160,7 +160,6 @@ export default function Lsystem(axiom, grammar, iterations) {
 				node = node.next;
 			}
 		}
-		console.log(lSystemLL);
 		return lSystemLL;
 	}
 }

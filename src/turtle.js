@@ -16,10 +16,218 @@ var TurtleState = function(pos, head, up, left, width) {
   };
 };
 
+// FIXME: we should use a factory or asset store here
+let maki_pink = null;
+let maki_red = null;
+let maki_white = null;
+let leaf = null;
+let petal_pink = null;
+
+function loadModel(modelPath, materialCb, manager) {
+  return new Promise((resolve, reject) => {
+    new THREE.OBJLoader(manager).load(modelPath, obj => {
+      materialCb(obj);
+      resolve(obj);
+    });
+  });
+}
+
+class modelFactory {
+
+  constructor() {
+    this.manager = new THREE.LoadingManager();
+  }
+  
+  async loadObj (model, path, color) {
+    if (model) {
+      return;
+    }
+    this.manager.onStart = (url, itemsLoaded, itemsTotal) => {
+      console.log(
+        "Started loading file: " +
+          url +
+          ".\nLoaded " +
+          itemsLoaded +
+          " of " +
+          itemsTotal +
+          " files."
+      );
+    };
+
+    this.manager.onLoad = () => {
+      console.log("Loading complete!");
+    };
+
+    this.manager.onProgress = (url, itemsLoaded, itemsTotal) => {
+      console.log(
+        "Loading file: " +
+          url +
+          ".\nLoaded " +
+          itemsLoaded +
+          " of " +
+          itemsTotal +
+          " files."
+      );
+    };
+
+    this.manager.onError = url => {
+      console.log("There was an error loading " + url);
+    };
+
+    maki_pink = await loadModel(
+      path,
+      obj => {
+        obj.traverse(child => {
+          if (child instanceof THREE.Mesh) {
+            child.material = new THREE.MeshLambertMaterial({
+              color: color,
+              transparent: true,
+              shading: THREE.FlatShading,
+              side: THREE.DoubleSide
+            });
+          }
+        });
+      },
+      this.manager
+    );
+  }
+};
+
+
+export async function loadObj() {
+  if (maki_red || maki_white || leaf || petal_pink) {
+    return;
+  }
+
+  var manager = new THREE.LoadingManager();
+  manager.onStart = (url, itemsLoaded, itemsTotal) => {
+    console.log(
+      "Started loading file: " +
+        url +
+        ".\nLoaded " +
+        itemsLoaded +
+        " of " +
+        itemsTotal +
+        " files."
+    );
+  };
+
+  manager.onLoad = () => {
+    console.log("Loading complete!");
+  };
+
+  manager.onProgress = (url, itemsLoaded, itemsTotal) => {
+    console.log(
+      "Loading file: " +
+        url +
+        ".\nLoaded " +
+        itemsLoaded +
+        " of " +
+        itemsTotal +
+        " files."
+    );
+  };
+
+  manager.onError = url => {
+    console.log("There was an error loading " + url);
+  };
+  
+  // pink maki
+  maki_pink = await loadModel(
+    "/src/assets/maki.obj",
+    obj => {
+      obj.traverse(child => {
+        if (child instanceof THREE.Mesh) {
+          child.material = new THREE.MeshLambertMaterial({
+            color: 0xeaa7d7,
+            transparent: true,
+            shading: THREE.FlatShading,
+            side: THREE.DoubleSide
+          });
+        }
+      });
+    },
+    manager
+  );
+  
+  // red maki
+  maki_red = await loadModel(
+    "/src/assets/maki.obj",
+    obj => {
+      obj.traverse(child => {
+        if (child instanceof THREE.Mesh) {
+          child.material = new THREE.MeshLambertMaterial({
+            color: 0xd4636f,
+            transparent: true,
+            shading: THREE.FlatShading,
+            side: THREE.DoubleSide
+          });
+        }
+      });
+    },
+    manager
+  );
+
+  // white maki
+  maki_white = await loadModel(
+    "/src/assets/maki.obj",
+    obj => {
+      obj.traverse(child => {
+        if (child instanceof THREE.Mesh) {
+          child.material = new THREE.MeshLambertMaterial({
+            color: 0xfaf0e6,
+            transparent: true,
+            shading: THREE.FlatShading,
+            side: THREE.DoubleSide
+          });
+        }
+      });
+    },
+    manager
+  );
+
+  // leaf
+  leaf = await loadModel(
+    "/src/assets/leaf.obj",
+    obj => {
+      obj.traverse(child => {
+        if (child instanceof THREE.Mesh) {
+          child.material = new THREE.MeshLambertMaterial({
+            color: 0x559f77,
+            transparent: true,
+            shading: THREE.FlatShading,
+            side: THREE.DoubleSide
+          });
+        }
+      });
+    },
+    manager
+  );
+
+  // pink patal
+  petal_pink = await loadModel(
+    "/src/assets/petal.obj",
+    obj => {
+      obj.traverse(child => {
+        if (child instanceof THREE.Mesh) {
+          child.material = new THREE.MeshLambertMaterial({
+            color: 0xeaa7d7,
+            transparent: true,
+            shading: THREE.FlatShading,
+            side: THREE.DoubleSide
+          });
+        }
+      });
+    },
+    manager
+  );
+  petal_pink.scale.set(0.015, 0.015, 0.015);
+}
+
 export default class Turtle {
-  constructor(scene, grammar) {
+  constructor(scene, iter, grammar) {
     this.state = new TurtleState(
-      new THREE.Vector3(0, -2, 0),
+      new THREE.Vector3(0, 4, 0),
       new THREE.Vector3(0, 1, 0),
       new THREE.Vector3(1, 0, 0),
       new THREE.Vector3(0, 0, 1),
@@ -27,10 +235,17 @@ export default class Turtle {
     );
     this.scene = scene;
     this.records = [];
-    this.maki_pink = null;
-    this.maki_red = null;
-    this.maki_white = null;
-    this.leaf = null;
+
+    this.maki_pink = maki_pink;
+    this.maki_red = maki_red;
+    this.maki_white = maki_white;
+    this.leaf = leaf;
+    this.length = 3 / (parseInt(iter + 0.5, 10) + 1) + (iter + 0.5 - parseInt(iter + 0.5, 10)) * 0.2;
+    console.log(iter);
+    console.log(this.length);
+    //this.length = iter / 50 + 0.5;
+
+    this.modelFactory = new modelFactory();
 
     // TODO: Start by adding rules for '[' and ']' then more!
     // Make sure to implement the functions for the new rules inside Turtle
@@ -59,7 +274,7 @@ export default class Turtle {
   // and its orientation to the Y axis
   clear() {
     this.state = new TurtleState(
-      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0, 4, 0),
       new THREE.Vector3(0, 1, 0),
       new THREE.Vector3(1, 0, 0),
       new THREE.Vector3(0, 0, 1)
@@ -127,10 +342,7 @@ export default class Turtle {
   // Make a cylinder of given length and width starting at turtle pos
   // Moves turtle pos ahead to end of the new cylinder
   makeCylinder(len, width) {
-    //len = 2 * (1 - this.state.layer / 10);
-    //var width1 = 0.4 / (this.state.layer * 4 + 4);
-    //var width2 = 0.4 / (this.state.layer * 4 + 6);
-    len = 0.5;
+    len = this.length;
     var width1 = this.state.width;
     var width2 = this.state.width;
     var geometry = new THREE.CylinderGeometry(width2, width1, len);
@@ -176,15 +388,17 @@ export default class Turtle {
     this.scene.add(cylinder);
 
     var mat5 = new THREE.Matrix4();
-    mat5.makeTranslation(0, -4, 0);
+    mat5.makeTranslation(0, 2, 0);
     cylinder.applyMatrix(mat5);
   }
 
-  makeFlower() {
-    //while (!leaf) {}
-    var makiMesh;
-    var rand = Math.random();
+  async makeFlower() {
+    let makiMesh;
+    let rand = Math.random();
     if (rand < 0.3) {
+      if (!maki_pink) {
+        await this.modelFactory.loadObj(maki_pink, "/src/assets/maki.obj", 0xeaa7d7);
+      }
       makiMesh = this.maki_pink.clone();
     } else if (rand < 0.6) {
       makiMesh = this.maki_red.clone();
@@ -196,18 +410,6 @@ export default class Turtle {
 
     rand = Math.random();
     rand = 0.006 + rand / 200;
-
-    /*
-    makiMesh.position.x += this.state.pos.x + this.state.left.x * this.state.width;
-    makiMesh.position.y += this.state.pos.y + this.state.left.y * this.state.width;
-    makiMesh.position.z += this.state.pos.z + this.state.left.z * this.state.width;
-    //makiMesh.position.x += trans.x;
-    //makiMesh.position.y += trans.y;
-    //makiMesh.position.z += trans.z;
-    makiMesh.rotation.x += this.state.head.x;
-    makiMesh.rotation.y += this.state.head.y;
-    makiMesh.rotation.z += this.state.head.z;
-    */
 
     //Orient the cylinder to the turtle's current direction
     var quat = new THREE.Quaternion();
@@ -263,11 +465,8 @@ export default class Turtle {
   renderSymbol(symbolNode) {
     var func = this.renderGrammar[symbolNode.symbol];
     if (func) {
-      //console.log(symbolNode.symbol);
       func();
-      //console.log(this.state.head);
     }
-    //console.log(this.scene);
   }
 
   // Invoke renderSymbol for every node in a linked list of grammar symbols.
@@ -282,120 +481,29 @@ export default class Turtle {
     }
   }
 
-  loadObj = (lsystem, iterations, turtle) => {
-    var manager = new THREE.LoadingManager();
-    manager.onStart = function(url, itemsLoaded, itemsTotal) {
-      console.log(
-        "Started loading file: " +
-          url +
-          ".\nLoaded " +
-          itemsLoaded +
-          " of " +
-          itemsTotal +
-          " files."
-      );
-    };
-
-    manager.onLoad = function() {
-      console.log("Loading complete!");
-      var result = lsystem.doIterations(iterations);
-      turtle.clear();
-      turtle = new Turtle(turtle.scene);
-      turtle.renderSymbols(result);
-    };
-
-    manager.onProgress = function(url, itemsLoaded, itemsTotal) {
-      console.log(
-        "Loading file: " +
-          url +
-          ".\nLoaded " +
-          itemsLoaded +
-          " of " +
-          itemsTotal +
-          " files."
-      );
-    };
-
-    manager.onError = function(url) {
-      console.log("There was an error loading " + url);
-    };
-
-    var loader = new THREE.OBJLoader(manager);
-
-    var maki_pink = this.maki_pink;
-    loader.load(
-      "/src/assets/maki.obj",
-
-      function(object) {
-        object.traverse(function(child) {
-          if (child instanceof THREE.Mesh) {
-            child.material = new THREE.MeshLambertMaterial({
-              color: 0xeaa7d7,
-              transparent: true,
-              shading: THREE.FlatShading,
-              side: THREE.DoubleSide
-            });
-          }
-        });
-        maki_pink = object;
+  creatPetals() {
+    let n = 0;
+    for (let i = -3; i <= 3; i += 1.5) {
+      for (let j = -3; j <= 3; j += 1.5) {
+        let petal = petal_pink.clone();
+        petal.name = 'p' + n++;
+        petal.position.set(i, Math.random() * 8, j);
+        petal.rotation.set(Math.random() * 2 - 1, 0, Math.random() * 2 - 1);
+        this.scene.add(petal);
       }
-    );
+    }
+  }
 
-    var maki_red = this.maki_red;
-    loader.load(
-      "/src/assets/maki.obj",
-
-      function(object) {
-        object.traverse(function(child) {
-          if (child instanceof THREE.Mesh) {
-            child.material = new THREE.MeshLambertMaterial({
-              color: 0xd4636f,
-              transparent: true,
-              shading: THREE.FlatShading,
-              side: THREE.DoubleSide
-            });
-          }
-        });
-        maki_red = object;
-      }
-    );
-
-    var maki_white = this.maki_white;
-    loader.load(
-      "/src/assets/maki.obj",
-
-      function(object) {
-        object.traverse(function(child) {
-          if (child instanceof THREE.Mesh) {
-            child.material = new THREE.MeshLambertMaterial({
-              color: 0xfaf0e6,
-              transparent: true,
-              shading: THREE.FlatShading,
-              side: THREE.DoubleSide
-            });
-          }
-        });
-        maki_white = object;
-      }
-    );
-
-    var leaf = this.leaf;
-    loader.load(
-      "/src/assets/leaf.obj",
-
-      function(object) {
-        object.traverse(function(child) {
-          if (child instanceof THREE.Mesh) {
-            child.material = new THREE.MeshLambertMaterial({
-              color: 0x559f77,
-              transparent: true,
-              shading: THREE.FlatShading,
-              side: THREE.DoubleSide
-            });
-          }
-        });
-        leaf.set(object);
-      }
-    );
+  createGround() {
+    var geometry = new THREE.PlaneGeometry( 20, 20);
+    var material = new THREE.MeshBasicMaterial( {color: 0xe7e7be, side: THREE.DoubleSide} );
+    var plane = new THREE.Mesh( geometry, material );
+    plane.position.set(0, 0, 0);
+    var quat = new THREE.Quaternion();
+    quat.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 1));
+    var mat4 = new THREE.Matrix4();
+    mat4.makeRotationFromQuaternion(quat);
+    plane.applyMatrix(mat4);
+    this.scene.add( plane );
   }
 }
