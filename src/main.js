@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import Framework from "./framework";
 import Lsystem, { LinkedListToString } from "./lsystem.js";
-import Turtle, { loadObj } from "./turtle.js";
+import Turtle from "./turtle.js";
+import ModelFactory from "./ModelFactory";
 
 let turtle;
 var time;
@@ -45,7 +46,7 @@ async function onLoad(framework) {
   // initialize LSystem and a Turtle to draw
   var lsys = new Lsystem();
   turtle = new Turtle(scene);
-  await loadObj();
+  await ModelFactory.loadAllModel();
 
   gui.add(camera, "fov", 0, 180).onChange(function(newVal) {
     camera.updateProjectionMatrix();
@@ -99,11 +100,10 @@ async function onUpdate(framework) {
     if (time % 300 == 0 && time <= 3299 && time > 1 ) {
       var lsys = new Lsystem();
       turtle = new Turtle(framework.scene);
-      await loadObj();
       clearScene(turtle);
       doLsystem(lsys, ((time / 300) % 11) / 2, turtle);
       if ((time / 300) % 11 == 10) {
-        turtle.creatPetals();
+        turtle.createPetals();
       }
     }
     

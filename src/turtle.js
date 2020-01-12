@@ -1,3 +1,4 @@
+import ModelFactory from './ModelFactory';
 const THREE = require("three");
 var OBJLoader = require("three-obj-loader");
 OBJLoader(THREE);
@@ -16,214 +17,6 @@ var TurtleState = function(pos, head, up, left, width) {
   };
 };
 
-// FIXME: we should use a factory or asset store here
-let maki_pink = null;
-let maki_red = null;
-let maki_white = null;
-let leaf = null;
-let petal_pink = null;
-
-function loadModel(modelPath, materialCb, manager) {
-  return new Promise((resolve, reject) => {
-    new THREE.OBJLoader(manager).load(modelPath, obj => {
-      materialCb(obj);
-      resolve(obj);
-    });
-  });
-}
-
-class modelFactory {
-
-  constructor() {
-    this.manager = new THREE.LoadingManager();
-  }
-  
-  async loadObj (model, path, color) {
-    if (model) {
-      return;
-    }
-    this.manager.onStart = (url, itemsLoaded, itemsTotal) => {
-      console.log(
-        "Started loading file: " +
-          url +
-          ".\nLoaded " +
-          itemsLoaded +
-          " of " +
-          itemsTotal +
-          " files."
-      );
-    };
-
-    this.manager.onLoad = () => {
-      console.log("Loading complete!");
-    };
-
-    this.manager.onProgress = (url, itemsLoaded, itemsTotal) => {
-      console.log(
-        "Loading file: " +
-          url +
-          ".\nLoaded " +
-          itemsLoaded +
-          " of " +
-          itemsTotal +
-          " files."
-      );
-    };
-
-    this.manager.onError = url => {
-      console.log("There was an error loading " + url);
-    };
-
-    maki_pink = await loadModel(
-      path,
-      obj => {
-        obj.traverse(child => {
-          if (child instanceof THREE.Mesh) {
-            child.material = new THREE.MeshLambertMaterial({
-              color: color,
-              transparent: true,
-              shading: THREE.FlatShading,
-              side: THREE.DoubleSide
-            });
-          }
-        });
-      },
-      this.manager
-    );
-  }
-};
-
-
-export async function loadObj() {
-  if (maki_red || maki_white || leaf || petal_pink) {
-    return;
-  }
-
-  var manager = new THREE.LoadingManager();
-  manager.onStart = (url, itemsLoaded, itemsTotal) => {
-    console.log(
-      "Started loading file: " +
-        url +
-        ".\nLoaded " +
-        itemsLoaded +
-        " of " +
-        itemsTotal +
-        " files."
-    );
-  };
-
-  manager.onLoad = () => {
-    console.log("Loading complete!");
-  };
-
-  manager.onProgress = (url, itemsLoaded, itemsTotal) => {
-    console.log(
-      "Loading file: " +
-        url +
-        ".\nLoaded " +
-        itemsLoaded +
-        " of " +
-        itemsTotal +
-        " files."
-    );
-  };
-
-  manager.onError = url => {
-    console.log("There was an error loading " + url);
-  };
-  
-  // pink maki
-  maki_pink = await loadModel(
-    "/src/assets/maki.obj",
-    obj => {
-      obj.traverse(child => {
-        if (child instanceof THREE.Mesh) {
-          child.material = new THREE.MeshLambertMaterial({
-            color: 0xeaa7d7,
-            transparent: true,
-            shading: THREE.FlatShading,
-            side: THREE.DoubleSide
-          });
-        }
-      });
-    },
-    manager
-  );
-  
-  // red maki
-  maki_red = await loadModel(
-    "/src/assets/maki.obj",
-    obj => {
-      obj.traverse(child => {
-        if (child instanceof THREE.Mesh) {
-          child.material = new THREE.MeshLambertMaterial({
-            color: 0xd4636f,
-            transparent: true,
-            shading: THREE.FlatShading,
-            side: THREE.DoubleSide
-          });
-        }
-      });
-    },
-    manager
-  );
-
-  // white maki
-  maki_white = await loadModel(
-    "/src/assets/maki.obj",
-    obj => {
-      obj.traverse(child => {
-        if (child instanceof THREE.Mesh) {
-          child.material = new THREE.MeshLambertMaterial({
-            color: 0xfaf0e6,
-            transparent: true,
-            shading: THREE.FlatShading,
-            side: THREE.DoubleSide
-          });
-        }
-      });
-    },
-    manager
-  );
-
-  // leaf
-  leaf = await loadModel(
-    "/src/assets/leaf.obj",
-    obj => {
-      obj.traverse(child => {
-        if (child instanceof THREE.Mesh) {
-          child.material = new THREE.MeshLambertMaterial({
-            color: 0x559f77,
-            transparent: true,
-            shading: THREE.FlatShading,
-            side: THREE.DoubleSide
-          });
-        }
-      });
-    },
-    manager
-  );
-
-  // pink patal
-  petal_pink = await loadModel(
-    "/src/assets/petal.obj",
-    obj => {
-      obj.traverse(child => {
-        if (child instanceof THREE.Mesh) {
-          child.material = new THREE.MeshLambertMaterial({
-            color: 0xeaa7d7,
-            transparent: true,
-            shading: THREE.FlatShading,
-            side: THREE.DoubleSide
-          });
-        }
-      });
-    },
-    manager
-  );
-  petal_pink.scale.set(0.015, 0.015, 0.015);
-}
-
 export default class Turtle {
   constructor(scene, iter, grammar) {
     this.state = new TurtleState(
@@ -235,17 +28,7 @@ export default class Turtle {
     );
     this.scene = scene;
     this.records = [];
-
-    this.maki_pink = maki_pink;
-    this.maki_red = maki_red;
-    this.maki_white = maki_white;
-    this.leaf = leaf;
     this.length = 3 / (parseInt(iter + 0.5, 10) + 1) + (iter + 0.5 - parseInt(iter + 0.5, 10)) * 0.2;
-    console.log(iter);
-    console.log(this.length);
-    //this.length = iter / 50 + 0.5;
-
-    this.modelFactory = new modelFactory();
 
     // TODO: Start by adding rules for '[' and ']' then more!
     // Make sure to implement the functions for the new rules inside Turtle
@@ -396,16 +179,13 @@ export default class Turtle {
     let makiMesh;
     let rand = Math.random();
     if (rand < 0.3) {
-      if (!maki_pink) {
-        await this.modelFactory.loadObj(maki_pink, "/src/assets/maki.obj", 0xeaa7d7);
-      }
-      makiMesh = this.maki_pink.clone();
+      makiMesh = ModelFactory.getModel('maki/pink').clone();
     } else if (rand < 0.6) {
-      makiMesh = this.maki_red.clone();
+      makiMesh = ModelFactory.getModel('maki/red').clone();
     } else if (rand < 0.8) {
-      makiMesh = this.maki_white.clone();
+      makiMesh = ModelFactory.getModel('maki/white').clone();
     } else {
-      makiMesh = this.leaf.clone();
+      makiMesh = ModelFactory.getModel('leaf').clone();
     }
 
     rand = Math.random();
@@ -481,11 +261,11 @@ export default class Turtle {
     }
   }
 
-  creatPetals() {
+  createPetals() {
     let n = 0;
     for (let i = -3; i <= 3; i += 1.5) {
       for (let j = -3; j <= 3; j += 1.5) {
-        let petal = petal_pink.clone();
+        let petal = ModelFactory.getModel('petal').clone();
         petal.name = 'p' + n++;
         petal.position.set(i, Math.random() * 8, j);
         petal.rotation.set(Math.random() * 2 - 1, 0, Math.random() * 2 - 1);
