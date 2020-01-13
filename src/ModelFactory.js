@@ -83,9 +83,9 @@ class ModelFactory {
   }
 
   async loadAllModel() {
-    const makiPath = "/src/assets/maki.obj";
-    const leafPath = "/src/assets/leaf.obj";
-    const petalPath = "/src/assets/petal.obj";
+    const makiPath = "assets/lsystem/maki.obj";
+    const leafPath = "assets/lsystem/leaf.obj";
+    const petalPath = "assets/lsystem/petal.obj";
 
     // FIXME: use constants to replace magic strings
     const models = {
