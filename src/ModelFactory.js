@@ -1,34 +1,13 @@
 import * as THREE from "three";
+import leafUrl from './assets/leaf.obj';
+import makiUrl from './assets/maki.obj';
+import petalUrl from './assets/petal.obj';
 
 function createLoadingManager() {
   let manager = new THREE.LoadingManager();
 
-  manager.onStart = (url, itemsLoaded, itemsTotal) => {
-    console.log(
-      "Started loading file: " +
-        url +
-        ".\nLoaded " +
-        itemsLoaded +
-        " of " +
-        itemsTotal +
-        " files."
-    );
-  };
-
   manager.onLoad = () => {
     console.log("Loading complete!");
-  };
-
-  manager.onProgress = (url, itemsLoaded, itemsTotal) => {
-    console.log(
-      "Loading file: " +
-        url +
-        ".\nLoaded " +
-        itemsLoaded +
-        " of " +
-        itemsTotal +
-        " files."
-    );
   };
 
   manager.onError = url => {
@@ -83,17 +62,13 @@ class ModelFactory {
   }
 
   async loadAllModel() {
-    const makiPath = "assets/lsystem/maki.obj";
-    const leafPath = "assets/lsystem/leaf.obj";
-    const petalPath = "assets/lsystem/petal.obj";
-
     // FIXME: use constants to replace magic strings
     const models = {
-      "maki/red": [makiPath, 0xd4636f],
-      "maki/white": [makiPath, 0xfaf0e6],
-      "maki/pink": [makiPath, 0xeaa7d7],
-      leaf: [leafPath, 0x559f77],
-      petal: [petalPath, 0xeaa7d7]
+      "maki/red": [makiUrl, 0xd4636f],
+      "maki/white": [makiUrl, 0xfaf0e6],
+      "maki/pink": [makiUrl, 0xeaa7d7],
+      leaf: [leafUrl, 0x559f77],
+      petal: [petalUrl, 0xeaa7d7]
     };
 
     for (const key of Object.keys(models)) {

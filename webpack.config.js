@@ -3,10 +3,11 @@ const path = require("path");
 module.exports = {
   entry: ["babel-polyfill", path.join(__dirname, "src/main.js")],
   output: {
-    filename: "./bundle.js"
+    filename: "./bundle.js",
+    publicPath: "/"
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js$/,
         exclude: /node_modules/,
@@ -18,6 +19,14 @@ module.exports = {
       {
         test: /\.glsl$/,
         loader: "webpack-glsl"
+      },
+      {
+        test: /\.obj$/,
+        loader: "url-loader",
+        options: {
+          esModule: false,
+          publicPath: 'images/'
+        }
       }
     ]
   },
